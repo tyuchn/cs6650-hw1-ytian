@@ -26,7 +26,6 @@ public class SkierClient {
     private final String port;
     private int successCount;
     private int failCount;
-    private final HttpClient client;
     private ExecutorService pool;
     private List<Long> latencyList;
     private final PrintWriter writer;
@@ -73,16 +72,9 @@ public class SkierClient {
         this.numLifts = numLifts;
         this.numRuns = numRuns;
         this.port = port;
-        MultiThreadedHttpConnectionManager connectionManager =
-                new MultiThreadedHttpConnectionManager();
-        this.client = new HttpClient(connectionManager);
         this.pool = Executors.newFixedThreadPool(numThreads + numThreads / 2);
         this.latencyList = new ArrayList<>();
         this.writer = new PrintWriter(String.format("%s.csv", numThreads), "UTF-8");
-    }
-
-    public HttpClient getHttpClient() {
-        return this.client;
     }
     
     public int getNumThreads() {
@@ -226,7 +218,7 @@ public class SkierClient {
         System.out.println("WallTime " + duration + "ms");
         System.out.println("Mean reponse time " + client.getMeanResponseTime());
         System.out.println("Median reponse time " + client.getMedianResponseTime());
-        System.out.println("Total throughput per ms " + ((client.getSuccessCount() + client.getFailCount()) / (float)duration));
+        System.out.println("Total throughput per second " + ((client.getSuccessCount() + client.getFailCount()) / (float)duration) * 1000);
         System.out.println("p99 " + client.getP99());
         System.out.println("Max response time " + client.getMaxResponseTime());
     }

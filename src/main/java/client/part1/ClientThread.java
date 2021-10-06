@@ -13,6 +13,7 @@ public class ClientThread implements Runnable {
     private final int endRange;
     private final int startTime;
     private final int endTime;
+    private HttpClient httpClient;
     private SkierClient client;
     private int successCount;
     private int failCount;
@@ -27,10 +28,11 @@ public class ClientThread implements Runnable {
         this.startTime = startTime;
         this.endTime = endTime;
         this.numPost = numPost;
+        this.httpClient = new HttpClient();
     }
 
     private void sendPostRequest(int skierID, int liftID, int time) {
-        String url = String.format("http://%s/cs6650_hw1_war_exploded/skiers/%d/seasons/2019/days/1/skiers/123", this.client.getPort(), skierID);
+        String url = String.format("http://%s/cs6650-hw1_war/skiers/%d/seasons/2019/days/1/skiers/123", this.client.getPort(), skierID);
         PostMethod method = new PostMethod(url);
 
         // Provide custom retry handler is necessary
@@ -45,7 +47,7 @@ public class ClientThread implements Runnable {
         try {
             // Execute the method.
             long startTime = System.currentTimeMillis();
-            int statusCode = client.getHttpClient().executeMethod(method);
+            int statusCode = httpClient.executeMethod(method);
             long endTime   = System.currentTimeMillis();
             long latency = endTime - startTime;
             if (statusCode != HttpStatus.SC_CREATED) {

@@ -20,7 +20,6 @@ public class SkierClient {
     private final String port;
     private int successCount;
     private int failCount;
-    private final HttpClient client;
     private ExecutorService pool;
 
     synchronized public void incrementSuccessCount(int count) {
@@ -56,14 +55,7 @@ public class SkierClient {
         this.numLifts = numLifts;
         this.numRuns = numRuns;
         this.port = port;
-        MultiThreadedHttpConnectionManager connectionManager =
-                new MultiThreadedHttpConnectionManager();
-        this.client = new HttpClient(connectionManager);
         this.pool = Executors.newFixedThreadPool(numThreads + numThreads / 2);
-    }
-
-    public HttpClient getHttpClient() {
-        return this.client;
     }
     
     public int getNumThreads() {
@@ -94,7 +86,7 @@ public class SkierClient {
             pool.execute(clientThread);
         }
         latch.await();
-        System.out.println(String.format("successful request: %d, numPost/thread: %d, threadCount: %d",successCount, numPost, threadCount));
+        //System.out.println(String.format("successful request: %d, numPost/thread: %d, threadCount: %d",successCount, numPost, threadCount));
     }
 
     public static void main(String[] args) throws InterruptedException {
@@ -157,10 +149,10 @@ public class SkierClient {
         int endTime = 90;
         int numPost = (runs / 5) * (skiers / phaseOneThreads);
         client.startClient(phaseOneThreads, startTime, endTime, numPost);
-        long phaseOneTime = System.currentTimeMillis() - start;
-        System.out.print("phase 1 time spent ");
-        System.out.println(phaseOneTime);
-        start = System.currentTimeMillis();
+//        long phaseOneTime = System.currentTimeMillis() - start;
+//        System.out.print("phase 1 time spent ");
+//        System.out.println(phaseOneTime);
+//        start = System.currentTimeMillis();
         // phase 2
         int phaseTwoThreads = threads;
         startTime = 91;
@@ -168,10 +160,10 @@ public class SkierClient {
         numPost = (int) ((runs * 0.6) * (skiers / phaseTwoThreads));
         //System.out.println(numPost * phaseTwoThreads);
         client.startClient(phaseTwoThreads, startTime, endTime, numPost);
-        long phaseTwoTime = System.currentTimeMillis() - start;
-        System.out.print("phase 2 time spent ");
-        System.out.println(phaseTwoTime);
-        start = System.currentTimeMillis();
+//        long phaseTwoTime = System.currentTimeMillis() - start;
+//        System.out.print("phase 2 time spent ");
+//        System.out.println(phaseTwoTime);
+//        start = System.currentTimeMillis();
         // phase 3
         int phaseThreeThreads = threads / 4;
         startTime = 361;
@@ -182,13 +174,13 @@ public class SkierClient {
         // wait for all thread to complete
         client.shutDownPool();
         // Calculate the wall time.
-        long phaseThreeTime = System.currentTimeMillis() - start;
-        System.out.print("phase 3 time spent ");
-        System.out.println(phaseThreeTime);
-        long duration = phaseOneTime + phaseTwoTime + phaseThreeTime;
+//        long phaseThreeTime = System.currentTimeMillis() - start;
+//        System.out.print("phase 3 time spent ");
+//        System.out.println(phaseThreeTime);
+        long duration = System.currentTimeMillis() - start;
         System.out.println("Successful requests sent " + client.getSuccessCount());
         System.out.println("Unsuccessful requests " + client.getFailCount());
         System.out.println("WallTime " + duration + "ms");
-        System.out.println("Total throughput per ms " + ((client.getSuccessCount() + client.getFailCount()) / (float)duration));
+        System.out.println("Total throughput per ms " + ((client.getSuccessCount() + client.getFailCount()) / (float)duration) * 1000);
     }
 }

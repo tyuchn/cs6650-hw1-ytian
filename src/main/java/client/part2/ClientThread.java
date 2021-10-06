@@ -1,9 +1,6 @@
 package client.part2;
 
-import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.NameValuePair;
+import org.apache.commons.httpclient.*;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 
@@ -17,6 +14,7 @@ public class ClientThread implements Runnable {
     private final int startTime;
     private final int endTime;
     private SkierClient client;
+    private HttpClient httpClient;
     private int successCount;
     private int failCount;
     private final CountDownLatch latch;
@@ -30,10 +28,11 @@ public class ClientThread implements Runnable {
         this.startTime = startTime;
         this.endTime = endTime;
         this.numPost = numPost;
+        this.httpClient = new HttpClient();
     }
 
     private void sendPostRequest(int skierID, int liftID, int time) {
-        String url = String.format("http://%s/cs6650_hw1_war_exploded/skiers/%d/seasons/2019/days/1/skiers/123", this.client.getPort(), skierID);
+        String url = String.format("http://%s/cs6650-hw1_war/skiers/%d/seasons/2019/days/1/skiers/123", this.client.getPort(), skierID);
         PostMethod method = new PostMethod(url);
 
         // Provide custom retry handler is necessary
@@ -48,7 +47,7 @@ public class ClientThread implements Runnable {
         try {
             // Execute the method.
             long startTime = System.currentTimeMillis();
-            int statusCode = client.getHttpClient().executeMethod(method);
+            int statusCode = httpClient.executeMethod(method);
             long endTime   = System.currentTimeMillis();
             long latency = endTime - startTime;
             if (statusCode != HttpStatus.SC_CREATED) {
@@ -62,7 +61,7 @@ public class ClientThread implements Runnable {
             // Use caution: ensure correct character encoding and is not binary data
             successCount += 1;
             client.addLatency(latency);
-            //client.writeToFile(String.format("%d %s %d %d", startTime, "POST", latency, statusCode));
+            client.writeToFile(String.format("%d %s %d %d", startTime, "POST", latency, statusCode));
         } catch (HttpException e) {
             failCount += 1;
             System.err.println("Fatal protocol violation: " + e.getMessage());
